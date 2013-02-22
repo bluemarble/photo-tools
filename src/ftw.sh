@@ -13,7 +13,7 @@ __ftw_internal()
    fi
 
    for entry in "${dir}"/* ; do
-      eval "${callback} ${entry}"
+      "${callback}" "${entry}"
       if [ -d "${entry}" ] ; then
          __ftw_internal "${entry}" "${callback}"
       fi

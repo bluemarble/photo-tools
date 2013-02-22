@@ -16,8 +16,26 @@ getFingerprint()
    return $?
 }
 
+# void callback
+__fingerprintOneFile()
+{
+   local fn="__fingerprintOneFile"
+
+   local file="$1"
+   log.debug $fn "generate fingerprint for: ${file}"
+   getFingerprint "${file}"
+}
+
 # int
 main()
 {
-   getFingerprint "$*"
+   local folder="$1"
+   if [ ! -d "${folder}" ] ; then
+      log.error main "not a folder: ${folder}"
+      return 1
+   fi
+
+   log.setLogLevel debug
+
+   ftw --callback __fingerprintOneFile "${folder}"
 }
