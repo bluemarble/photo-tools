@@ -17,13 +17,29 @@ getFingerprint()
 }
 
 # void callback
+__progressIndicator()
+{
+   spinner --next
+}
+
+# void callback
 __fingerprintOneFile()
 {
    local fn="__fingerprintOneFile"
+   eventpool.fireEvent "fingerprint"
+
+   if [ ! -f "$1" ] ; then
+      return
+   fi
 
    local file="$1"
-   log.debug $fn "generate fingerprint for: ${file}"
-   getFingerprint "${file}"
+   local contentsHash="$(getFingerprint "${file}")"
+   local filenameHash="$(echo "${file}" | md5sum | sed -e 's/ \*-//')"
+
+   log.debug $fn "generate fingerprint for: ${file}, ${contentsHash}"
+   echo "${file}"
+   echo "   contents-hash: ${contentsHash}"
+   echo "   filename-hash: ${filenameHash}"
 }
 
 # int
@@ -35,7 +51,10 @@ main()
       return 1
    fi
 
-   log.setLogLevel debug
+   #log.setLogLevel debug
+   #eventpool.subscribe fingerprint __progressIndicator
 
+   #spinner --start
    ftw --callback __fingerprintOneFile "${folder}"
+   #spinner --end
 }

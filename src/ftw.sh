@@ -1,5 +1,5 @@
 #
-# ftw.shf -- file tree walker
+# ftw.sh -- file tree walker
 #
 
 # static int
@@ -74,5 +74,5 @@ ftw()
 }
 
 #
-# End of ftw.shf
+# End of ftw.sh
 #
