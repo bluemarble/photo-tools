@@ -1,6 +1,21 @@
 nulldev=/dev/null
 
 # public string
+normalizeFilename()
+{
+   local varname="${1}"
+   local varvalue=
+   eval varvalue="\${${varname}}"
+   while true ; do
+      case "${varvalue}" in
+      *//*) varvalue="${varvalue%//*}/${varvalue##*//}" ;;
+      *)   break ;;
+      esac
+   done
+   eval ${varname}="${varvalue}"
+}
+
+# public string
 getFingerprint()
 {
    local fn="getFingerprint"
@@ -32,7 +47,10 @@ __fingerprintOneFile()
       return
    fi
 
+   # normalize file names: replace // -> /
    local file="$1"
+   normalizeFilename file
+
    local contentsHash="$(getFingerprint "${file}")"
    local filenameHash="$(echo "${file}" | md5sum | sed -e 's/ \*-//')"
 
@@ -40,6 +58,8 @@ __fingerprintOneFile()
    echo "${file}"
    echo "   contents-hash: ${contentsHash}"
    echo "   filename-hash: ${filenameHash}"
+
+   echo "${file}" | db.create "${contentsHash}" "${filenameHash}"
 }
 
 # int
@@ -53,6 +73,8 @@ main()
 
    #log.setLogLevel debug
    #eventpool.subscribe fingerprint __progressIndicator
+
+   db.init .dbphoto
 
    #spinner --start
    ftw --callback __fingerprintOneFile "${folder}"
